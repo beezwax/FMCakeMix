@@ -2,6 +2,8 @@ FMCakeMix is a FileMaker datasource driver for the CakePHP MVC framework. FMCake
 
 To get more familiar with CakePHP visit: http://cakephp.org/
 
+See the User Guide.pdf for usage information
+
 Installation
 
 Download and follow the installation instructions from the cake website http://cakephp.org/.
