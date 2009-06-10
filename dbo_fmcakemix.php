@@ -4,7 +4,7 @@
  * @author Alex Gibbons alex_g@beezwax.net
  * @date 02/2009
  * 
- * Copyright (c) 2009 Alex Gibbons
+ * Copyright (c) 2009 Alex Gibbons, Beezwax.net
  * 
  *
  * Licensed under The MIT License (see included LICENSE.txt)
@@ -22,7 +22,7 @@
 // Web Site: www.iviking.org
 // =================================================================================
 
-require(VENDORS.'FX.php');
+App::import('Vendor','FX', array('file' => 'FX.php'));
 
 class DboFMCakeMix extends DataSource { 
 
@@ -165,9 +165,14 @@ class DboFMCakeMix extends DataSource {
 			$model->recursive = $recursive;
 		}
 		
-		
-		// set basic connection data
-		$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit );
+		// set connection data if Count query
+		if($queryData['fields'] == 'COUNT') {
+			// reset the connection parameters to return only 1 result, improves performance
+			$this->connection->SetDBData($fm_database, $fm_layout, 1 );
+		} else {
+			// set basic connection data
+			$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit );
+		}
 		
 		
 		/*
