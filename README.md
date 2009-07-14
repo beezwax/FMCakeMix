@@ -32,6 +32,15 @@ Install the dbo_fmcakemix.php file into
 yourcakeinstall/app/models/datasources/dbo, you’ll likely have to create the
 dbo directory in the datasources folder.
 
+Support
+-------
+
+See "License" below for the warranty and support disclaimer (that is, you're on
+your own, buddy).
+
+That being said, you might be able to get some help at [the project
+site](https://projects.beezwax.net/projects/show/cake-fm-driver).
+
 Credit
 ------
 
