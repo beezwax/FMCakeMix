@@ -155,7 +155,7 @@ class DboFMCakeMix extends DataSource {
      */ 
     function read(& $model, $queryData = array (), $recursive = null) { 
 		
-		$fm_layout = $model->defualtLayout;
+		$fm_layout = $model->defaultLayout;
 		$fm_database = $model->fmDatabaseName;
 		$queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
 		$linkedModels = array();
@@ -373,7 +373,7 @@ class DboFMCakeMix extends DataSource {
 	function delete(&$model, $conditions = null) {
 		
 		
-		$fm_layout = $model->defualtLayout;
+		$fm_layout = $model->defaultLayout;
 		$fm_database = $model->fmDatabaseName;
 		
 		// set basic connection data
@@ -419,7 +419,7 @@ class DboFMCakeMix extends DataSource {
 		$count = count($fields);
 		
 		// get connection parameters
-		$fm_layout = $model->defualtLayout;
+		$fm_layout = $model->defaultLayout;
 		$fm_database = $model->fmDatabaseName;
 		
 		// set basic connection data
@@ -499,7 +499,7 @@ class DboFMCakeMix extends DataSource {
 		
 		
 		// get connection parameters
-		$fm_layout = $model->defualtLayout;
+		$fm_layout = $model->defaultLayout;
 		$fm_database = $model->fmDatabaseName;
 		
 		if(!empty($model->id)) {
@@ -569,7 +569,7 @@ class DboFMCakeMix extends DataSource {
 			return $cache;
 		}
 		
-		$fm_layout = $model->defualtLayout;
+		$fm_layout = $model->defaultLayout;
 		$fm_database = $model->fmDatabaseName;
 		
 		// set basic connection data
@@ -756,7 +756,7 @@ class DboFMCakeMix extends DataSource {
     function readAssociated($linkedModel, $queryData = array (), $recursive = null) { 
 		
 		
-		$fm_layout = $linkedModel->defualtLayout;
+		$fm_layout = $linkedModel->defaultLayout;
 		$fm_database = $linkedModel->fmDatabaseName;
 		$queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
 		

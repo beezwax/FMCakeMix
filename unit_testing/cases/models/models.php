@@ -2,7 +2,7 @@
 
 class TestArticle extends CakeTestModel {
 	
-	var $defualtLayout = 'Article';
+	var $defaultLayout = 'Article';
 	var $useDbConfig = 'test';
 	var $fmDatabaseName = 'DriverUnitTesting';
 	var $name = 'TestArticle';
@@ -10,7 +10,7 @@ class TestArticle extends CakeTestModel {
 
 class TestRelationsArticle extends CakeTestModel {
 	
-	var $defualtLayout = 'Article';
+	var $defaultLayout = 'Article';
 	var $useDbConfig = 'test';
 	var $fmDatabaseName = 'DriverUnitTesting';
 	var $name = 'TestRelationsArticle';
@@ -32,7 +32,7 @@ class TestRelationsArticle extends CakeTestModel {
 
 class TestComment extends CakeTestModel {
 	
-	var $defualtLayout = 'Comments';
+	var $defaultLayout = 'Comments';
 	var $useDbConfig = 'test';
 	var $fmDatabaseName = 'DriverUnitTesting';
 	var $name = 'TestComment';
@@ -40,7 +40,7 @@ class TestComment extends CakeTestModel {
 
 class TestUser extends CakeTestModel {
 	
-	var $defualtLayout = 'Users';
+	var $defaultLayout = 'Users';
 	var $useDbConfig = 'test';
 	var $fmDatabaseName = 'DriverUnitTesting';
 	var $name = 'TestUser';
