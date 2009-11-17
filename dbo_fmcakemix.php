@@ -6,10 +6,24 @@
  * 
  * Copyright (c) 2009 Alex Gibbons, Beezwax.net
  * 
- *
- * Licensed under The MIT License (see included LICENSE.txt)
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.  
  */ 
-
 
 
 
@@ -181,8 +195,8 @@ class DboFMCakeMix extends DataSource {
 			* this is a major limitation of fx.php
 		*/
 		if(!empty($queryData['conditions'])) {
-			$conditions = array(); 								// a clean set of queries
-			$isOr = false;  									// a boolean indicating wether this query is logical or
+			$conditions = array(); // a clean set of queries
+			$isOr = false;  // a boolean indicating wether this query is logical or
 		
 			foreach($queryData['conditions'] as $conditionField => $conditionValue) {
 				// if a logical or statement has been pased somewhere
@@ -207,6 +221,9 @@ class DboFMCakeMix extends DataSource {
 					$plainField = $string;
 				}
 				
+				// $pattern = '/(\w+)\.(-*\w+)$/i';
+				// $replacement = '${2}';
+				// $plainField = preg_replace($pattern, $replacement, $string);
 				
 				$this->connection->AddDBParam($plainField, $conditionValue, 'eq');
 				
@@ -217,6 +234,21 @@ class DboFMCakeMix extends DataSource {
 			}
 			
 		}
+		
+		
+		// // add the params
+		// if(!empty($queryData['conditions'])) {
+		// 	foreach($queryData['conditions'] as $conditionField => $conditionValue) {
+		// 		if($conditionField == 'or') {
+		// 			
+		// 		}
+		// 		$string = $conditionField;
+		// 		$pattern = '/(\w+)\.(-*\w+)$/i';
+		// 		$replacement = '${2}';
+		// 		$plainField = preg_replace($pattern, $replacement, $string);
+		// 		$this->connection->AddDBParam($plainField, $conditionValue, 'eq');
+		// 	}
+		// }
 		
 		// set sort order
 		foreach($queryData['order'] as $orderCondition) {
@@ -274,12 +306,40 @@ class DboFMCakeMix extends DataSource {
 				$resultsOut[$i][$model->name]['-recid'] = $recmodid_Ary[0];
 				$resultsOut[$i][$model->name]['-modid'] = $recmodid_Ary[1];
 				
+				/*
+					TODO_ABG : the commented out section below is a smart bit of code that 
+					* will convert filemaker's related fields into separate models
+					* following the cake format, but issues are...
+					* 1) the model name it gathers from the table occurence will likely
+					*    not conform to the Model name defined in cake
+					* 2) it might not be necessary and it may be better to treat this related
+					*    data as local to the table and do model recursion separately
+				*/
 				foreach($recordData as $field => $value) {
-					$resultsOut[$i][$model->name][$field] = $value[0];
+					// if $field is not a related entity
+					// if(strpos($field, '::') === false) {
+						// grab table field data (grabs first repitition)
+						$resultsOut[$i][$model->name][$field] = $value[0];
+					// } else {
+					// 	$relatedModelName = preg_replace("/(\w+)::(\w+)/", "$1", $field);
+					// 	// grab related data
+					// 	foreach($value as $index => $relatedData) {
+					// 		$relatedField = preg_replace("/(\w+)::(\w+)/", "$2", $field);
+					// 		$relatedModels[$relatedModelName][$index][$relatedField] = $relatedData;
+					// 	}
+					// }
 				}
+				
+				// conditionally add a pseudo model consisting of layout value lists
+				if (!empty($model->returnValueListAsModel)) {
+          $resultsOut[$i][$model->returnValueListAsModel] = 'ddd';
+    		}
+    		
 				$i++;
 			}
 		}
+		
+		
 		
 		
 		// ================================
@@ -310,6 +370,7 @@ class DboFMCakeMix extends DataSource {
 					}
 				}
 			}
+			//$this->__filterResults($resultSet, $model, $filtered);
 		}
 		
 	
@@ -347,6 +408,7 @@ class DboFMCakeMix extends DataSource {
 				if (!isset($params[1])) {
 					$params[1] = 'count';
 				}
+				//return 'COUNT(' . $this->name($params[0]) . ') AS ' . $this->name($params[1]);
 				return 'COUNT';
 			case 'max':
 			case 'min':
@@ -358,6 +420,9 @@ class DboFMCakeMix extends DataSource {
 		}
 	}
 	
+	/*
+		TODO_ABG: Should provide error when -recid is not passed.
+	*/
 	
 	/**
 	 * The "D" in CRUD 
@@ -425,6 +490,7 @@ class DboFMCakeMix extends DataSource {
 		// set basic connection data
 		$this->connection->SetDBData($fm_database, $fm_layout);
 		
+		// Debugger::log(print_r($fields,true));
 		
 		// if by chance the recid was passed to this create method we want
 		// to make sure we remove it as filemaker will reject the request.
@@ -482,6 +548,9 @@ class DboFMCakeMix extends DataSource {
 		return true;
 	}
 	
+	/*
+		TODO_ABG: add support for -modid and transactions
+	*/
 	
 	/**
 	 * The "U" in CRUD
@@ -579,7 +648,7 @@ class DboFMCakeMix extends DataSource {
 		$result = $this->connection->FMFindAny(true, 'basic');
 		
 		// check for error
-		if(!$this->handleFXResult($result, $model->name, 'describe')) {
+		if (!$this->handleFXResult($result, $model->name, 'describe')) {
 			return FALSE;
 		}
 		
@@ -623,6 +692,18 @@ class DboFMCakeMix extends DataSource {
 			'key' => null
 		);
 		
+		
+		// value list handling
+		if (!empty($model->returnValueLists) && $model->returnValueLists === true) {
+		  $layoutObject = $this->connection->FMView();
+
+		  foreach($layoutObject['fields'] as $field) {
+		    if (!empty($field['valuelist'])) {
+		      $fieldsOut[$field['name']]['valuelist'] = $layoutObject['valueLists'][$field['valuelist']];
+		    }
+	    } 
+		}
+    
 		
 		$this->__cacheDescription($this->fullTableName($model, false), $fieldsOut);
 		return $fieldsOut;
@@ -688,11 +769,19 @@ class DboFMCakeMix extends DataSource {
      */    
     function generateAssociationQuery(& $model, & $linkModel, $type, $association = null, $assocData = array (), & $queryData, $external = false, & $resultSet) { 
          
+        //$this->__scrubQueryData($queryData); 
+
+		//echo 'LIMIT:'.print_r($assocData['limit'],true).'<br />';
          
         switch ($type) { 
             case 'hasOne' : 
+                $id = $resultSet[$model->name][$model->primaryKey]; 
+                $queryData['conditions'] = trim($assocData['foreignKey']) . '=' . trim($id); 
+                //$queryData['targetDn'] = $linkModel->useTable; 
+                //$queryData['type'] = 'search'; 
+                $queryData['limit'] = 1; 
 
-                return null; 
+                return $queryData; 
                  
             case 'belongsTo' : 
 				
@@ -700,16 +789,23 @@ class DboFMCakeMix extends DataSource {
 				$queryData['conditions'] = array(trim($linkModel->primaryKey) => trim($id));
 				$queryData['order'] = array();
 				$queryData['fields'] = '';
-                $queryData['limit'] = 1;
+                $queryData['limit'] = 1;//$assocData['limit']; 
 				
                 return $queryData; 
                  
             case 'hasMany' : 
 				
+				// THIS ONE IS THE ONLY ONE THAT's BEEN MODIFIED
+				/*
+					TODO_ABG: take these changes and test for other types of relationships
+				*/
+				
                 $id = $resultSet[$model->name][$model->primaryKey]; 
                 $queryData['conditions'] = array(trim($assocData['foreignKey']) => trim($id));
 				$queryData['order'] = array();
-				$queryData['fields'] = ''; 
+				$queryData['fields'] = '';
+                //$queryData['targetDn'] = $linkModel->useTable; 
+                //$queryData['type'] = 'search'; 
                 $queryData['limit'] = $assocData['limit']; 
 
                 return $queryData; 
@@ -725,6 +821,9 @@ class DboFMCakeMix extends DataSource {
 	 * 
 	 */
 	
+	/*
+		TODO_ABG : missing real recursion
+	*/
     function queryAssociation(& $model, & $linkModel, $type, $association, $assocData, & $queryData, $external = false, & $resultSet, $recursive, $stack) { 
         
 		
@@ -740,7 +839,54 @@ class DboFMCakeMix extends DataSource {
 			}
 		}
 		
+		//debug($associatedData);
 		
+        // if (!isset ($resultSet) || !is_array($resultSet)) { 
+        //     if (Configure :: read() > 0) { 
+        //         e('<div style = "font: Verdana bold 12px; color: #FF0000">SQL Error in model ' . $model->name . ': '); 
+        //         if (isset ($this->error) && $this->error != null) { 
+        //             e($this->error); 
+        //         } 
+        //         e('</div>'); 
+        //     } 
+        //     return null; 
+        // } 
+        //  
+        // $count = count($resultSet); 
+        // for ($i = 0; $i < $count; $i++) { 
+        //      
+        //     $row = & $resultSet[$i]; 
+        //     $queryData = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $row); 
+        //     $fetch = $this->_executeQuery($queryData); 
+        //     $fetch = ldap_get_entries($this->connection, $fetch); 
+        //     $fetch = $this->_ldapFormat($linkModel,$fetch); 
+        //      
+        //     if (!empty ($fetch) && is_array($fetch)) { 
+        //             if ($recursive > 0) { 
+        //                 foreach ($linkModel->__associations as $type1) { 
+        //                     foreach ($linkModel-> {$type1 } as $assoc1 => $assocData1) { 
+        //                         $deepModel = & $linkModel->{$assocData1['className']}; 
+        //                         if ($deepModel->alias != $model->name) { 
+        //                             $tmpStack = $stack; 
+        //                             $tmpStack[] = $assoc1; 
+        //                             if ($linkModel->useDbConfig == $deepModel->useDbConfig) { 
+        //                                 $db = & $this; 
+        //                             } else { 
+        //                                 $db = & ConnectionManager :: getDataSource($deepModel->useDbConfig); 
+        //                             } 
+        //                             $queryData = array(); 
+        //                             $db->queryAssociation($linkModel, $deepModel, $type1, $assoc1, $assocData1, $queryData, true, $fetch, $recursive -1, $tmpStack); 
+        //                         } 
+        //                     } 
+        //                 } 
+        //             } 
+        //         $this->__mergeAssociation($resultSet[$i], $fetch, $association, $type); 
+        // 
+        //     } else { 
+        //         $tempArray[0][$association] = false; 
+        //         $this->__mergeAssociation($resultSet[$i], $tempArray, $association, $type); 
+        //     } 
+        // } 
     } 
 
 	/** 
@@ -759,11 +905,13 @@ class DboFMCakeMix extends DataSource {
 		$fm_layout = $linkedModel->defaultLayout;
 		$fm_database = $linkedModel->fmDatabaseName;
 		$queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
+		//$linkedModels = array();
 		
 		
 		// set basic connection data
 		$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit );
 		
+		//debug($queryData);
 		
 		// add the params
 		if(!empty($queryData['conditions'])) {
@@ -900,6 +1048,8 @@ class DboFMCakeMix extends DataSource {
 	function handleFXResult($result, $modelName = 'N/A', $actionName = 'N/A') {
 		
 		
+		//debug($result);
+		
 		$this->_queriesCnt++;
 		
 		// if a connection error
@@ -955,6 +1105,13 @@ class DboFMCakeMix extends DataSource {
 			return TRUE;
 		}
 	}
+	
+	/**
+	 * include value lists in data result
+	 */
+  function includeValueListsInDataResult () {
+    
+  }
 	
 
     /** 
@@ -1021,6 +1178,7 @@ class DboFMCakeMix extends DataSource {
 			}
 			print ("</tbody></table>\n");
 			
+			//echo '<pre>' . print_r($log, true) . '</pre>';
 		} else {
 			foreach ($log as $k => $i) {
 				print (($k + 1) . ". {$i['query']} {$i['error']}\n");

@@ -413,47 +413,115 @@ class ModelTest extends CakeTestCase {
 	 * @access public
 	 * @return void
 	 */	
-		function testCreateBelongsToFind() {
-			
-			$userModel =& new TestUser();
-			$_data = array(
-				'TestUser' => array(
-					'name_first' => 'UT CBTF First Name',
-					'name_last' => 'UT CBTF Last Name'
-				)
-			);
-			$userModel->create();
-			$saveResultUser = $userModel->save($_data);
+	function testCreateBelongsToFind() {
+		
+		$userModel =& new TestUser();
+		$_data = array(
+			'TestUser' => array(
+				'name_first' => 'UT CBTF First Name',
+				'name_last' => 'UT CBTF Last Name'
+			)
+		);
+		$userModel->create();
+		$saveResultUser = $userModel->save($_data);
 
-			$this->assertTrue($saveResultUser);
+		$this->assertTrue($saveResultUser);
 
-			$articleModel =& new TestRelationsArticle();
-			$_data = array(
-				'TestRelationsArticle' => array(
-					'_fk_user_id' => $saveResultUser['TestUser']['id'],
-					'Title' => 'UT CBTF Title',
-					'Body' => 'UT CBTF Body'
-				)
-			);
-			$articleModel->create();
-			$saveResultArticle = $articleModel->save($_data);
+		$articleModel =& new TestRelationsArticle();
+		$_data = array(
+			'TestRelationsArticle' => array(
+				'_fk_user_id' => $saveResultUser['TestUser']['id'],
+				'Title' => 'UT CBTF Title',
+				'Body' => 'UT CBTF Body'
+			)
+		);
+		$articleModel->create();
+		$saveResultArticle = $articleModel->save($_data);
 
-			$this->assertTrue($saveResultArticle);
+		$this->assertTrue($saveResultArticle);
 
-			$findResult = $articleModel->find('first', array(
-				'conditions' => array(
-					'TestRelationsArticle.-recid' => $articleModel->getId() 
-				)
-			));
+		$findResult = $articleModel->find('first', array(
+			'conditions' => array(
+				'TestRelationsArticle.-recid' => $articleModel->getId() 
+			)
+		));
 
 
-			$this->assertTrue($findResult);
-			$this->assertEqual($findResult['TestRelationsArticle']['Title'], 'UT CBTF Title');
-			$this->assertEqual(count($findResult['TestUser']), 1);
-			$this->assertEqual($findResult['TestUser'][0]['name_first'], 'UT CBTF First Name');
-			$this->assertEqual($findResult['TestUser'][0]['name_last'], 'UT CBTF Last Name');
+		$this->assertTrue($findResult);
+		$this->assertEqual($findResult['TestRelationsArticle']['Title'], 'UT CBTF Title');
+		$this->assertEqual(count($findResult['TestUser']), 1);
+		$this->assertEqual($findResult['TestUser'][0]['name_first'], 'UT CBTF First Name');
+		$this->assertEqual($findResult['TestUser'][0]['name_last'], 'UT CBTF Last Name');
 
+	}
+
+  /**
+   * testDescribe
+   * 
+   * @access public
+   * @return void
+   */
+  function testDescribe() {
+    
+    $model =& new TestArticle();
+		
+		$schema = $model->schema();
+		
+		$this->assertEqual($schema['Title']['type'], 'string');
+		$this->assertEqual($schema['id']['type'], 'float');
+		$this->assertEqual($schema['created']['type'], 'timestamp');
+		$this->assertEqual($schema['-recid']['type'], 'integer');
+		
+		
+		
+  }
+	
+  /**
+   * testValueList
+   * requires that a value list be present on test layout
+   * 
+   * @access public
+   * @return void
+   */
+  function testReturnsValueList() {
+    
+    $model =& new TestArticle();
+		
+		$schema = $model->schema();
+		
+		$this->assertTrue($schema);
+		$this->assertEqual($schema['Title']['valuelist'], array(
+		  'Amazing New Release', 
+		  'Politics as Usual', 
+		  'The Long Road Home'
+	  ));
+	  $this->assertEqual($schema['Body']['valuelist'], array(
+		  'Once upon a time...', 
+		  'In a world far far away...', 
+		  'First there was darkness...'
+	  ));
+	  
+	  
+	  $title_schema = $model->schema('Title');
+	  
+	  $this->assertEqual($title_schema['valuelist'], array(
+		  'Amazing New Release', 
+		  'Politics as Usual', 
+		  'The Long Road Home'
+	  ));
+	  
+	  
+	  // assert TestComment has no valuelists
+	  $model =& new TestComment();
+		
+		$schema = $model->schema();
+		
+		foreach ($schema as $field) {
+		  $this->assertTrue(!isset($field['valuelist']));
 		}
+		
+		
+  }
 
 
 /**
