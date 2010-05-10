@@ -60,7 +60,6 @@ class ModelTest extends CakeTestCase {
  function testColumnTypeFetching() {
    
    $model =& new TestArticle();
-    // echo '<pre>'.print_r($model,true).'</pre>';
    $this->assertEqual($model->getColumnType('TestArticle.created'), 'timestamp');
    $this->assertEqual($model->getColumnType('TestArticle.Body'), 'string');
    $this->assertEqual($model->getColumnType('TestArticle.id'), 'float');
@@ -536,7 +535,6 @@ class ModelTest extends CakeTestCase {
     $result = $model->read();
 
     $schema = $model->schema();
-    pr($schema);
     
     $this->assertEqual(count($schema['Title']['valuelist']), 3);
     $this->assertEqual(count($schema['Body']['valuelist']), 3);
