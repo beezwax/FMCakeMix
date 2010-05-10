@@ -6,7 +6,7 @@ class TestArticle extends CakeTestModel {
 	var $useDbConfig = 'test';
 	var $fmDatabaseName = 'DriverUnitTesting';
 	var $name = 'TestArticle';
-	var $returnValueLists = true;
+  var $returnValueLists = true;
 }
 
 class TestRelationsArticle extends CakeTestModel {
