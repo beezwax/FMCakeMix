@@ -182,8 +182,8 @@ class DboFMCakeMix extends DataSource {
    * @return unknown 
    */ 
   function read(&$model, $queryData = array(), $recursive = null) {
-    $fm_layout = empty($model->defaultLayout) ? $this->config['database'] : $model->defaultLayout;
     $fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
+    $fm_layout = empty($model->defaultLayout) ? $fm_database : $model->defaultLayout;
     $queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
     $linkedModels = array();
   
@@ -401,8 +401,8 @@ class DboFMCakeMix extends DataSource {
    * @return boolean Success
    */
   function delete(&$model, $conditions = null) {
-    $fm_layout = empty($model->defaultLayout) ? $this->config['database'] : $model->defaultLayout;
     $fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
+    $fm_layout = empty($model->defaultLayout) ? $fm_database : $model->defaultLayout;
     
     // set basic connection data
     $this->connection->SetDBData($fm_database, $fm_layout);
@@ -446,8 +446,8 @@ class DboFMCakeMix extends DataSource {
     $count = count($fields);
     
     // get connection parameters
-    $fm_layout = empty($model->defaultLayout) ? $this->config['database'] : $model->defaultLayout;
     $fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
+    $fm_layout = empty($model->defaultLayout) ? $fm_database : $model->defaultLayout;
     
     // set basic connection data
     $this->connection->SetDBData($fm_database, $fm_layout);
@@ -524,8 +524,8 @@ class DboFMCakeMix extends DataSource {
     
     
     // get connection parameters
-    $fm_layout = empty($model->defaultLayout) ? $this->config['database'] : $model->defaultLayout;
     $fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
+    $fm_layout = empty($model->defaultLayout) ? $fm_database : $model->defaultLayout;
     
     if(!empty($model->id)) {
       
@@ -594,8 +594,8 @@ class DboFMCakeMix extends DataSource {
       return $cache;
     }
     
-    $fm_layout = empty($model->defaultLayout) ? $this->config['database'] : $model->defaultLayout;
     $fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
+    $fm_layout = empty($model->defaultLayout) ? $fm_database : $model->defaultLayout;
     
     // set basic connection data
     $this->connection->SetDBData($fm_database, $fm_layout);
@@ -796,8 +796,8 @@ class DboFMCakeMix extends DataSource {
    * @return unknown 
    */ 
   function readAssociated($linkedModel, $queryData = array (), $recursive = null) { 
-    $fm_layout = empty($linkedModel->defaultLayout) ? $this->config['database'] : $linkedModel->defaultLayout;
     $fm_database = empty($linkedModel->fmDatabaseName) ? $this->config['database'] : $linkedModel->fmDatabaseName;
+    $fm_layout = empty($linkedModel->defaultLayout) ? $fm_database : $linkedModel->defaultLayout;
     $queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
     
     // set basic connection data
