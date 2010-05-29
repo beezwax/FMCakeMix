@@ -305,7 +305,7 @@ class DboFMCakeMix extends DataSource {
         $resultsOut[$i][$model->name]['-modid'] = $recmodid_Ary[1];
       
         foreach($recordData as $field => $value) {
-          $resultsOut[$i][$model->name][$field] = $value[0];
+          $resultsOut[$i][$model->name][$field] = isset($value[0]) ? $value[0] : "";
         }
       
         $i++;
