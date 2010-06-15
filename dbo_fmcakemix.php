@@ -188,11 +188,10 @@ class DboFMCakeMix extends DataSource {
     $linkedModels = array();
   
     // take recursive value from recursive param or from queryData
-    if (!isset($recursive)) {
-      $_recursive = $model->recursive;
-      $model->recursive = $_recursive;
-    } else if(!isset($queryData['recursive'])) {
-      $_recursive = $model->recursive;
+    $_recursive = $model->recursive;
+    if (!is_null($recursive)) {
+      $model->recursive = $recursive;
+    } else if(isset($queryData['recursive'])) {
       $model->recursive = $queryData['recursive'];
     }
   
@@ -876,6 +875,7 @@ class DboFMCakeMix extends DataSource {
             // grab table field data (grabs first repitition)
             $resultsOut[$i][$linkedModel->name][$field] = $value[0];
           } else {
+            $resultsOut[$i][$linkedModel->name][$field] = isset($value[0]) ? $value[0] : null;
           }
         }
       $i++;
@@ -1073,33 +1073,28 @@ class DboFMCakeMix extends DataSource {
    */ 
   function showLog() {
     
-    $log = $this->_queriesLog;
+    return false;
     
-    $totalTime = 0;
-    foreach($log as $entry) {
-      $totalTime += $entry['took'];
-    }
-
-    if ($this->_queriesCnt > 1) {
-      $text = 'queries';
-    } else {
-      $text = 'query';
-    }
-
-    if (PHP_SAPI != 'cli') {
-      print ("<table class=\"cake-sql-log\" id=\"cakeSqlLog_" . preg_replace('/[^A-Za-z0-9_]/', '_', uniqid(time(), true)) . "\" summary=\"Cake SQL Log\" cellspacing=\"0\" border = \"0\">\n<caption>({$this->configKeyName}) {$this->_queriesCnt} {$text} took {$totalTime} ms</caption>\n");
-      print ("<thead>\n<tr><th>Nr</th><th>Model</th><th>Action</th><th>Query</th><th>Error</th><th>Num. rows</th><th>Took (ms)</th></tr>\n</thead>\n<tbody>\n");
-      
-      foreach ($log as $k => $i) {
-        print ("<tr><td>" . ($k + 1) . "</td><td>{$i['model']}</td><td>{$i['action']}</td><td>" . h($i['query']) . "</td><td>{$i['error']}</td><td style = \"text-align: right\">{$i['numRows']}</td><td style = \"text-align: right\">{$i['took']}</td></tr>\n");
-      }
-      print ("</tbody></table>\n");
-      
-    } else {
-      foreach ($log as $k => $i) {
-        print (($k + 1) . ". {$i['query']} {$i['error']}\n");
-      }
-    }
+  }
+  
+  
+  /**
+   * Get the query log as an array.
+   *
+   * @param boolean $sorted Get the queries sorted by time taken, defaults to false.
+   * @return array Array of queries run as an array
+   * @access public
+   */
+  function getLog($sorted = false, $clear = true) {
+  	if ($sorted) {
+  		$log = sortByKey($this->_queriesLog, 'took', 'desc', SORT_NUMERIC);
+  	} else {
+  		$log = $this->_queriesLog;
+  	}
+  	if ($clear) {
+  		$this->_queriesLog = array();
+  	}
+  	return array('log' => $log, 'count' => $this->_queriesCnt, 'time' => $this->_queriesTime);
   }
 
   /** 

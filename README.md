@@ -10,6 +10,12 @@ To get more familiar with CakePHP visit: http://cakephp.org/
 
 See the User Guide.pdf for usage information
 
+Notice
+------
+
+This product should be considered a work in progress, please test and use at your own risk and contribute back any changes or fixes you may have. The driver is currently targeted to work with the 3.X series of CakePHP.
+
+
 Installation
 ------------
 
