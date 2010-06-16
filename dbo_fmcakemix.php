@@ -253,8 +253,8 @@ class DboFMCakeMix extends DataSource {
     // set sort order
     foreach($queryData['order'] as $orderCondition) {
       if(!empty($orderCondition)){
-        foreach($orderCondition as $orderConditionField => $sortRule) {
-          $field = $this->parseConditionField($model, $orderConditionField, 'field');
+        foreach($orderCondition as $field => $sortRule) {
+          $field = $this->parseConditionField($model, $conditionField, 'field');
         
           $sortRuleFm = $sortRule == 'desc' ? 'descend' : 'ascend';
           $this->connection->AddSortParam($field, $sortRuleFm);
