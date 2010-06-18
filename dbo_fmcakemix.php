@@ -578,6 +578,37 @@ class DboFMCakeMix extends DataSource {
       return false;
     }
   }
+
+/**
+ * Returns an array of layouts in the database. If there are no layouts, an error is raised and the application exits. (experimental)
+ *
+ * @return array Array of layoutnames in the database
+ *
+ * TODO: support baking and implement index() function etc.
+ */
+	function listSources() {
+		$cache = parent::listSources();
+
+		if ($cache != null) {
+			return $cache;
+		}
+		$this->connection->SetDBData($this->config['database']);
+		$result = $this->connection->FMLayoutNames();
+
+		if (empty($result)) {
+			return array();
+		} else {
+			$layouts = array();
+			foreach($result['data'] as $table) {
+				if (!empty($table['LAYOUT_NAME'][0])) {
+					$layouts[] = $table['LAYOUT_NAME'][0];
+				}
+			}
+			parent::listSources($layouts);
+			return $layouts;
+		}
+		return array();
+	}
   
   /**
    * Returns an array of the fields in given table name.
