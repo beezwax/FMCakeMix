@@ -22,12 +22,12 @@ FMCakeMixの使い方についてはUser Guide.pdf（英文）を参照してく
 インストール
 ------------
 
-http://cakephp.org/からCakePHPをダウンロードして、Webサイトのマニュアルにある
+http://cakephp.org/ からCakePHPをダウンロードして、Webサイトのマニュアルにある
 インストール手順にならってインストールおよび設定を行います。
 
 FX.phpは、Chris Hansen氏が中心になって開発した、PHPからFileMaker Proデータベー
 スに接続するためのライブラリクラスです。FMCakeMixは、FileMaker Proデータベース
-に接続する際に内部的にFX.phpを利用しています。http://www.iviking.org/FX.php/か
+に接続する際に内部的にFX.phpを利用しています。http://www.iviking.org/FX.php/ か
 らFX.phpのファイルをダウンロードして、FX.php、FX_Error.php、FX_Constants.phpお
 よびimage_proxy.phpのファイルをvendorsフォルダの直下に配置します。
 
