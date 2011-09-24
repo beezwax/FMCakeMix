@@ -482,13 +482,6 @@ class Filemaker extends DboSource {
 		}
 
 
-		// write recid to model id and __lastinsert attributes
-		foreach($return['data'] as $recmodid => $returnedModel){
-			$recmodid_Ary = explode('.', $recmodid);
-			$model->id = $recmodid_Ary[0];
-			$model->setInsertID($recmodid_Ary[0]);
-		}
-
 		$resultsOut = array();
 		if(!empty($return['data'])) {
 			foreach($return['data'] as $recmodid => $recordData) {
@@ -497,6 +490,11 @@ class Filemaker extends DboSource {
 				$resultsOut[$model->name]['-modid'] = $recmodid_Ary[1];
 
 				foreach($recordData as $field => $value) {
+					if ($field == $model->primaryKey) {
+						// write primary key to model id and __lastinsert attributes
+						$model->id = $value[0];
+						$model->setInsertID($value[0]);
+					}
 					$resultsOut[$model->name][$field] = $value[0];
 				}
 			}
