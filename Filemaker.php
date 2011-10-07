@@ -183,7 +183,7 @@ class Filemaker extends DboSource {
  * @param Model $model 
  * @param array $queryData 
  * @param integer $recursive Number of levels of association 
- * @return unknown 
+ * @return mixed boolean false on error/failure.  An array of results on success.
  */
 	public function read(&$model, $queryData = array(), $recursive = null) {
 		$fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
@@ -320,8 +320,8 @@ class Filemaker extends DboSource {
 		// = Searching for Related Models =
 		// ================================
 		if ($model->recursive > 0) {
-			if (is_array($model->__associations)) {
-				foreach ($model->__associations as $type) {
+			if (is_array($model->_associations)) {
+				foreach ($model->_associations as $type) {
 					foreach ($model->{$type} as $assoc => $assocData) {
 						$linkModel =& $model->{$assoc};
 						
@@ -364,7 +364,6 @@ class Filemaker extends DboSource {
  * @param string $func Lowercase name of SQL function, i.e. 'count' or 'max'
  * @param array $params Function parameters
  * @return string flag informing read function to parse results as per special case of $func
- * @access public
  */
 	public function calculate(&$model, $func, $params = array()) {
 		$params = (array)$params;
@@ -407,8 +406,14 @@ class Filemaker extends DboSource {
 		// set basic connection data
 		$this->connection->SetDBData($fm_database, $fm_layout);
 
-		if(is_null($conditions)) {
-			$this->connection->AddDBParam('-recid', $model->getId(), 'eq');
+		if(!isset($conditions['-recid'])) {
+			$model->find('first', array(
+				'conditions' => array(
+					  '-recid' => $model->field('-recid'),
+				),
+				'recursive' => 0
+			));
+			$this->connection->AddDBParam('-recid', $model->field('-recid'), '');
 		} else {
 			// must contain a -recid field
 			foreach($conditions as $field => $value) {
@@ -432,7 +437,7 @@ class Filemaker extends DboSource {
  * @param Model $model
  * @param array $fields
  * @param array $values
- * @return boolean Success
+ * @return array The current Model::data; after merging $data and/or defaults from database
  */
 	public function create(&$model, $fields = null, $values = null) {
 		$id = null;
@@ -543,12 +548,16 @@ class Filemaker extends DboSource {
 			// ensure that a recid is passed
 			if(!in_array('-recid',$fields)) {
 				array_push($fields, '-recid');
-				array_push($values, $model->getId());
+				array_push($values, $model->field('-recid'));
 			}
 
 			// there must be a -recid field passed in here for the edit to work
 			// could be passed in hidden form field
 			foreach($fields as $index => $field) {
+				if ($field == $model->primaryKey) {
+					$model->id = $values[$index];
+					$model->setInsertID($values[$index]);
+				}
 				$this->connection->AddDBParam($field, $values[$index]);
 			}
 
@@ -563,12 +572,6 @@ class Filemaker extends DboSource {
 			if($return['errorCode'] != 0) {
 				return false;
 			} else {
-				foreach($return['data'] as $recmodid => $returnedModel){
-					$recmodid_Ary = explode('.', $recmodid);
-					$model->id = $recmodid_Ary[0];
-					$model->setInsertID($recmodid_Ary[0]);
-				}
-
 				return true;
 			}
 		} else {
@@ -1015,6 +1018,39 @@ class Filemaker extends DboSource {
 	}
 
 /**
+ * begin method
+ *
+ * FileMaker Server XML API doesn't support transactions
+ *
+ * @return void
+ */
+	public function begin() {
+		return false;
+	}
+
+/**
+ * rollback method
+ *
+ * FileMaker Server XML API doesn't support transactions
+ *
+ * @return void
+ */
+	public function rollback() {
+		return false;
+	}
+
+/**
+ * commit method
+ *
+ * FileMaker Server XML API doesn't support transactions
+ *
+ * @return void
+ */
+	public function commit() {
+		return false;
+	}
+
+/**
  * Returns number of rows in previous resultset. If no previous resultset exists, 
  * this returns false. 
  * NOT USED
@@ -1066,7 +1102,6 @@ class Filemaker extends DboSource {
  *
  * @param boolean $sorted Get the queries sorted by time taken, defaults to false.
  * @return array Array of queries run as an array
- * @access public
  */
 	public function getLog($sorted = false, $clear = true) {
 		if ($sorted) {
