@@ -85,20 +85,12 @@ class Filemaker extends DboSource {
  * Constructor 
  */ 
 	public function __construct($config = null) { 
-		$this->debug = Configure :: read() > 0; 
-		$this->fullDebug = Configure :: read() > 1;
+		$this->debug = Configure::read('debug') > 0; 
+		$this->fullDebug = Configure::read('debug') > 1;
 		$this->timeFlag = microtime(true);
 
 		parent :: __construct($config); 
 		return $this->connect(); 
-	}
-
-/**
- * Destructor. Closes connection to the database. 
- */
-	public function __destruct() { 
-		$this->close(); 
-		parent :: __destruct(); 
 	}
 
 /**
@@ -119,47 +111,6 @@ class Filemaker extends DboSource {
 
 		$this->connected = true; //always returns true
 		return $this->connected; 
-	}
-
-/**
- * Close.
- */
-	public function close() { 
-		if ($this->fullDebug && Configure :: read() > 1) { 
-			$this->showLog(); 
-		}
-		$this->disconnect(); 
-	}
-
-/**
- * disconnect
- */
-	public function disconnect() { 
-		$this->connected = false;
-		return $this->connected;
-	}
-
-/**
- * Checks if it's connected to the database
- * 
- * @return boolean True if the database is connected, else false 
- */
-	public function isConnected() { 
-		return $this->connected;
-	}
-
-/**
- * Reconnects to database server with optional new settings 
- * 
- * @param array $config An array defining the new configuration settings 
- * @return boolean True on success, false on failure 
- */
-	public function reconnect($config = null) { 
-		$this->disconnect(); 
-		if ($config != null) { 
-			$this->config = am($this->_baseConfig, $this->config, $config); 
-		}
-		return $this->connect();
 	}
 
 /**
@@ -279,7 +230,7 @@ class Filemaker extends DboSource {
 
 			// test result
 			if(!$this->handleFXResult($fmResults, $model->name, 'read (count)')) {
-				return FALSE;
+				return false;
 			}
 
 			$countResult = array();
@@ -292,7 +243,7 @@ class Filemaker extends DboSource {
 			$fmResults = $this->connection->FMFind();
 
 			if(!$this->handleFXResult($fmResults, $model->name, 'read')) {
-				return FALSE;
+				return false;
 			}
 		}
 
@@ -360,7 +311,7 @@ class Filemaker extends DboSource {
  * currently this only returns a 'count' flag if a count is requested. This will tell
  * the read function to return a found count rather than results
  *
- * @param model $model
+ * @param Model $model
  * @param string $func Lowercase name of SQL function, i.e. 'count' or 'max'
  * @param array $params Function parameters
  * @return string flag informing read function to parse results as per special case of $func
@@ -425,19 +376,19 @@ class Filemaker extends DboSource {
 		$return = $this->connection->FMDelete(TRUE);
 
 		if(!$this->handleFXResult($return, $model->name, 'delete')) {
-			return FALSE;
+			return false;
 		} else {
-			return TRUE;
+			return true;
 		}
 	}
 
 /**
  * The "C" in CRUD
- *
+ * 
  * @param Model $model
  * @param array $fields
  * @param array $values
- * @return array The current Model::data; after merging $data and/or defaults from database
+ * @return boolean Success
  */
 	public function create(&$model, $fields = null, $values = null) {
 		$id = null;
@@ -478,14 +429,8 @@ class Filemaker extends DboSource {
 		$return = $this->connection->FMNew();
 
 		if(!$this->handleFXResult($return, $model->name, 'new')) {
-			return FALSE;
-		}
-
-
-		if($return['errorCode'] != 0) {
 			return false;
 		}
-
 
 		$resultsOut = array();
 		if(!empty($return['data'])) {
@@ -521,61 +466,50 @@ class Filemaker extends DboSource {
  * @param array $fields
  * @param array $values
  * @param mixed $conditions
- * @return array
+ * @return boolean Success
  */
-	public function update(&$model, $fields = array(), $values = null, $conditions = null) {
-
+	public function update(Model $model, $fields = array(), $values = null, $conditions = null) {
 		// get connection parameters
 		$fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
 		$fm_layout = empty($model->defaultLayout) ? $this->config['defaultLayout'] : $model->defaultLayout;
 
-		if(!empty($model->id)) {
+		// set basic connection data
+		$this->connection->SetDBData($fm_database, $fm_layout);
 
-			// set basic connection data
-			$this->connection->SetDBData($fm_database, $fm_layout);
-
-			// **1 here we remove the primary key field if it's marked as readonly 
-			// other fields can be removed by the controller, but cake requires
-			// the primary key to be included in the query if it's to consider
-			// the action an edit
-			foreach($fields as $index => $field) {
-				if(isset($model->primaryKeyReadOnly) && $field == $model->primaryKey) {
-					unset($fields[$index]);
-					unset($values[$index]);
-				}
+		// **1 here we remove the primary key field if it's marked as readonly 
+		// other fields can be removed by the controller, but cake requires
+		// the primary key to be included in the query if it's to consider
+		// the action an edit
+		foreach($fields as $index => $field) {
+			if(isset($model->primaryKeyReadOnly) && $field == $model->primaryKey) {
+				unset($fields[$index]);
+				unset($values[$index]);
 			}
+		}
 
-			// ensure that a recid is passed
-			if(!in_array('-recid',$fields)) {
-				array_push($fields, '-recid');
-				array_push($values, $model->field('-recid'));
+		// ensure that a recid is passed
+		if(!in_array('-recid',$fields)) {
+			array_push($fields, '-recid');
+			array_push($values, $model->field('-recid'));
+		}
+
+		// there must be a -recid field passed in here for the edit to work
+		// could be passed in hidden form field
+		foreach($fields as $index => $field) {
+			if ($field == $model->primaryKey) {
+				$model->id = $values[$index];
+				$model->setInsertID($values[$index]);
 			}
+			$this->connection->AddDBParam($field, $values[$index]);
+		}
 
-			// there must be a -recid field passed in here for the edit to work
-			// could be passed in hidden form field
-			foreach($fields as $index => $field) {
-				if ($field == $model->primaryKey) {
-					$model->id = $values[$index];
-					$model->setInsertID($values[$index]);
-				}
-				$this->connection->AddDBParam($field, $values[$index]);
-			}
+		// perform edit
+		$return = $this->connection->FMEdit();
 
-			// perform edit
-			$return = $this->connection->FMEdit();
-
-			if(!$this->handleFXResult($return, $model->name, 'update')) {
-				return FALSE;
-			}
-
-
-			if($return['errorCode'] != 0) {
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		if(!$this->handleFXResult($return, $model->name, 'update')) {
 			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -604,7 +538,7 @@ class Filemaker extends DboSource {
 
 		// check for error
 		if (!$this->handleFXResult($result, $model->name, 'describe')) {
-			return FALSE;
+			return false;
 		}
 
 		$fieldsOut = array();
@@ -834,7 +768,7 @@ class Filemaker extends DboSource {
 
 			// check for error
 			if(!$this->handleFXResult($fmResults, $linkedModel->name, 'readassociated (count)')) {
-				return FALSE;
+				return false;
 			}
 
 			$countResult = array();
@@ -848,7 +782,7 @@ class Filemaker extends DboSource {
 
 			// check for error
 			if(!$this->handleFXResult($fmResults, $linkedModel->name, 'readassociated')) {
-				return FALSE;
+				return false;
 			}
 		}
 
@@ -976,7 +910,7 @@ class Filemaker extends DboSource {
 			CakeLog::write('error', $this->formatErrorMessage('FX Error', $result->toString(), $modelName, $actionName));
 
 			$this->timeFlag = microtime(true);
-			return FALSE;
+			return false;
 
 			// if a filemaker error other than no records found
 		} elseif ($result['errorCode'] != 0 && $result['errorCode'] != 401)  {
@@ -998,7 +932,7 @@ class Filemaker extends DboSource {
 			CakeLog::write('error', $this->formatErrorMessage('FileMaker Error', $result['errorCode'], $modelName, $actionName, substr($result['URL'],strrpos($result['URL'], '?'))));
 
 			$this->timeFlag = microtime(true);
-			return FALSE;
+			return false;
 		} else {
 
 			// log query
@@ -1013,7 +947,7 @@ class Filemaker extends DboSource {
 			);
 
 			$this->timeFlag = microtime(true);
-			return TRUE;
+			return true;
 		}
 	}
 
@@ -1022,7 +956,7 @@ class Filemaker extends DboSource {
  *
  * FileMaker Server XML API doesn't support transactions
  *
- * @return void
+ * @return false
  */
 	public function begin() {
 		return false;
@@ -1033,7 +967,7 @@ class Filemaker extends DboSource {
  *
  * FileMaker Server XML API doesn't support transactions
  *
- * @return void
+ * @return false
  */
 	public function rollback() {
 		return false;
@@ -1044,7 +978,7 @@ class Filemaker extends DboSource {
  *
  * FileMaker Server XML API doesn't support transactions
  *
- * @return void
+ * @return false
  */
 	public function commit() {
 		return false;
@@ -1054,32 +988,47 @@ class Filemaker extends DboSource {
  * Returns number of rows in previous resultset. If no previous resultset exists, 
  * this returns false. 
  * NOT USED
- * 
- * @return int Number of rows in resultset 
+ *
+ * @param mixed $source Not used
+ * @return null
  */
-	public function lastNumRows() { 
+	public function lastNumRows($source = null) { 
 		return null; 
 	}
 
 /**
  * NOT USED
+ *
+ * @param string $sql
+ * @param array $options
+ * @param array $params values to be bided to the query
+ * @return false
  */ 
-	public function execute($query) { 
-		return null; 
+	public function execute($sql, $options = array(), $params = array()) { 
+		return false; 
 	}
 
 /**
- * NOT USED 
+ * NOT USED
+ *
+ * @param string $sql SQL statement
+ * @param array $params parameters to be bound as values for the SQL statement
+ * @param array $options additional options for the query.
+ * @return false
  */ 
-	public function fetchAll($query, $cache = true) { 
-		return array(); 
+	public function fetchAll($sql, $params = array(), $options = array()) { 
+		return false; 
 	}
 
 // Logs -------------------------------------------------------------- 
 /**
- * logQuery
+ * NOT USED
+ *
+ * @param string $sql SQL statement
+ * @return void
  */ 
-	public function logQuery($query) {}
+	public function logQuery($sql) {
+	}
 
 /**
  * formatErrorMessage
@@ -1091,35 +1040,10 @@ class Filemaker extends DboSource {
 /**
  * Outputs the contents of the queries log.
  * 
- * @param boolean $sorted 
+ * @param boolean $sorted
+ * @return false
  */
 	public function showLog() {
 		return false;
 	}
-
-/**
- * Get the query log as an array.
- *
- * @param boolean $sorted Get the queries sorted by time taken, defaults to false.
- * @return array Array of queries run as an array
- */
-	public function getLog($sorted = false, $clear = true) {
-		if ($sorted) {
-			$log = sortByKey($this->_queriesLog, 'took', 'desc', SORT_NUMERIC);
-		} else {
-			$log = $this->_queriesLog;
-		}
-		if ($clear) {
-			$this->_queriesLog = array();
-		}
-		return array('log' => $log, 'count' => $this->_queriesCnt, 'time' => $this->_queriesTime);
-	}
-
-/**
- * Output information about a query
- * NOT USED
- * 
- * @param string $query Query to show information on. 
- */ 
-	public function showQuery($query) {} 
 }

@@ -36,7 +36,6 @@ class TestRelationsArticle extends CakeTestModel {
 	
 	public $belongsTo = array(
 		'TestUser' => array(
-			//'className' => 'TestUser',
 			'foreignKey' => '_fk_user_id'
 		)
 	);
@@ -132,9 +131,37 @@ class FilemakerTest extends CakeTestCase {
 		);
 		$model->create();
 		$saveResult = $model->save($_data);
+		
 		$this->assertInternalType('array', $saveResult);
 		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT Title');
 		$this->assertEqual($saveResult['TestArticle']['Body'], 'UT Body');
+		$this->assertEqual($model->primaryKey, 'id');
+		$this->assertArrayHasKey('id', $model->schema());
+		$this->assertArrayHasKey('-recid', $model->schema());
+		$this->assertArrayHasKey('-modid', $model->schema());
+	}
+
+/**
+ * testCreateRecordWithFMRecID method
+ *
+ * @return void
+ */
+	public function testCreateRecordWithFMRecID() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT CRWFMRID Title',
+				'Body' => 'UT CRWFMRID Body',
+				'-recid' => '',
+			)
+		);
+		$model->create();
+		$model->fm_recid = '-recid';
+		$saveResult = $model->save($_data);
+		
+		$this->assertInternalType('array', $saveResult);
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CRWFMRID Title');
+		$this->assertEqual($saveResult['TestArticle']['Body'], 'UT CRWFMRID Body');
 		$this->assertEqual($model->primaryKey, 'id');
 		$this->assertArrayHasKey('id', $model->schema());
 		$this->assertArrayHasKey('-recid', $model->schema());
@@ -294,6 +321,97 @@ class FilemakerTest extends CakeTestCase {
 	}
 
 /**
+ * testCreateSaveRecord method
+ *
+ * @return void
+ */
+	public function testCreateSaveRecord() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT CSR Title',
+				'Body' => 'UT CSR Body'
+			)
+		);
+		$model->create();
+		$saveResult = $model->save($_data);
+
+		$this->assertInternalType('array', $saveResult);
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CSR Title');
+
+		$_data = array(
+			'TestArticle' => array(
+				'id' => $saveResult['TestArticle']['id'],
+				'Title' => 'UT CSR Title Updated',
+				'Body' => 'UT CSR Body Updated'
+			)
+		);
+		$model->create();
+		$model->id = $saveResult['TestArticle']['id'];
+		$saveResult = $model->save($_data);
+		
+		$this->assertInternalType('array', $saveResult);
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CSR Title Updated');
+		$this->assertEqual($saveResult['TestArticle']['Body'], 'UT CSR Body Updated');
+
+		$findResult = $model->find('first', array(
+			'conditions' => array(
+				'TestArticle.id' => $model->field('id')
+			)
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual($findResult['TestArticle']['Title'], 'UT CSR Title Updated');
+		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CSR Body Updated');
+	}
+
+/**
+ * testCreateSaveRecordWithPrimaryKeyReadOnly method
+ *
+ * @return void
+ */
+	public function testCreateSaveRecordWithPrimaryKeyReadOnly() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT CSRWPKRO Title',
+				'Body' => 'UT CSRWPKRO Body'
+			)
+		);
+		$model->create();
+		$saveResult = $model->save($_data);
+
+		$this->assertInternalType('array', $saveResult);
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CSRWPKRO Title');
+
+		$_data = array(
+			'TestArticle' => array(
+				'id' => $saveResult['TestArticle']['id'],
+				'Title' => 'UT CSRWPKRO Title Updated',
+				'Body' => 'UT CSRWPKRO Body Updated'
+			)
+		);
+		$model->create();
+		$model->id = $saveResult['TestArticle']['id'];
+		$model->primaryKeyReadOnly = true;
+		$saveResult = $model->save($_data);
+		
+		$this->assertInternalType('array', $saveResult);
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CSRWPKRO Title Updated');
+		$this->assertEqual($saveResult['TestArticle']['Body'], 'UT CSRWPKRO Body Updated');
+
+		$findResult = $model->find('first', array(
+			'conditions' => array(
+				'TestArticle.-recid' => $model->field('-recid')
+			)
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual($findResult['TestArticle']['Title'], 'UT CSRWPKRO Title Updated');
+		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CSRWPKRO Body Updated');
+	}
+
+/**
  * testSaveAll method
  *
  * @return void
@@ -432,6 +550,57 @@ class FilemakerTest extends CakeTestCase {
 	}
 
 /**
+ * testCreateHasManyFindWithOutRecursive method
+ *
+ * @return void
+ */
+	public function testCreateHasManyFindWithOutRecursive() {
+		$articleModel =& new TestRelationsArticle();
+		$_data = array(
+			'TestRelationsArticle' => array(
+				'Title' => 'UT CHMF Title',
+				'Body' => 'UT CHMF Body'
+			)
+		);
+		$articleModel->create();
+		$saveResultArticle = $articleModel->save($_data);
+
+		$this->assertInternalType('array', $saveResultArticle);
+
+		$comment =& new TestComment();
+		$_data = array(
+			'TestComment' => array(
+				array(
+					'_fk_article_id' => $saveResultArticle['TestRelationsArticle']['id'],
+					'body' => 'UT CHFM Comment Body'
+				), 
+				array(
+					'_fk_article_id' => $saveResultArticle['TestRelationsArticle']['id'],
+					'body' => 'UT CHFM Comment Body TWO'
+				)
+			)
+		);
+
+		$comment->create();
+		$saveResultComment = $comment->saveAll($_data['TestComment'], array(
+			'atomic' => false
+		));
+
+		$this->assertInternalType('array', $saveResultComment);
+
+		$findResult = $articleModel->find('first', array(
+			'conditions' => array(
+				'TestRelationsArticle.id' => $articleModel->getId()
+			),
+			'recursive' => 0,
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual($findResult['TestRelationsArticle']['Title'], 'UT CHMF Title');
+		$this->assertArrayNotHasKey('TestComment', $findResult);
+	}
+
+/**
  * testCreateBelongsToFind method
  *
  * @return void
@@ -510,12 +679,283 @@ class FilemakerTest extends CakeTestCase {
 				'or' => true,
 				'TestArticle.Title' => $_data['TestArticle'][1]['Title']
 				)
-			));
+		));
 
 		$this->assertInternalType('array', $findResult);
 		$this->assertEqual(count($findResult), 2);
 		$this->assertEqual($findResult[0]['TestArticle']['Body'], $_data['TestArticle'][0]['Body']);
 		$this->assertEqual($findResult[1]['TestArticle']['Title'], $_data['TestArticle'][1]['Title']); 
+	}
+
+/**
+ * testCreateFindSortRecordDescend method
+ *
+ * @return void
+ */
+	public function testCreateFindSortRecordDescend() {
+		$model =& new TestArticle();
+
+		$_data = array(
+			'TestArticle' => array(
+				array(
+					'Title' => 'UT testsort A',
+				), 
+				array(
+					'Title' => 'UT testsort B'
+				)
+			)
+		);
+		$model->create();
+		$saveResult = $model->saveAll($_data['TestArticle'], array(
+			'atomic' => FALSE
+		));
+
+		$this->assertInternalType('array', $saveResult);
+
+		$findResult = $model->find('all', array(
+			'conditions' => array(
+					'TestArticle.Title' => 'UT testsort',
+					'TestArticle.Title.op' => 'cn',
+				),
+			'order' => array('TestArticle.Title' => 'desc'),
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual(count($findResult), 2);
+		$this->assertEqual($findResult[0]['TestArticle']['Title'], $_data['TestArticle'][1]['Title']);
+		$this->assertEqual($findResult[1]['TestArticle']['Title'], $_data['TestArticle'][0]['Title']); 
+	}
+
+/**
+ * testCreateFindSkipRecord method
+ *
+ * @return void
+ */
+	public function testCreateFindSkipRecord() {
+		$model =& new TestArticle();
+
+		$_data = array(
+			'TestArticle' => array(
+				array(
+					'Title' => 'UT testskip A',
+				), 
+				array(
+					'Title' => 'UT testskip B',
+				)
+			)
+		);
+		$model->create();
+		$saveResult = $model->saveAll($_data['TestArticle'], array(
+			'atomic' => FALSE
+		));
+
+		$this->assertInternalType('array', $saveResult);
+
+		$findResult = $model->find('all', array(
+			'conditions' => array(
+					'TestArticle.Title' => 'UT testskip',
+					'TestArticle.Title.op' => 'cn',
+				),
+			'offset' => 1,
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual(count($findResult), 1);
+		$this->assertEqual($findResult[0]['TestArticle']['Title'], $_data['TestArticle'][1]['Title']);
+	}
+
+/**
+ * testCreateFindCountRecord method
+ *
+ * @return void
+ */
+	public function testCreateFindCountRecord() {
+		$model =& new TestArticle();
+
+		$_data = array(
+			'TestArticle' => array(
+				array(
+					'Title' => 'UT testcount A',
+					'Body' => '100',
+				), 
+				array(
+					'Title' => 'UT testcount B',
+					'Body' => '10',
+				),
+				array(
+					'Title' => 'UT testcount C',
+					'Body' => '1000',
+				)
+			)
+		);
+		$model->create();
+		$saveResult = $model->saveAll($_data['TestArticle'], array(
+			'atomic' => FALSE
+		));
+
+		$this->assertInternalType('array', $saveResult);
+
+		$countResult = $model->find('count', array(
+			'conditions' => array(
+					'TestArticle.Title' => 'UT testcount',
+					'TestArticle.Title.op' => 'cn',
+					'TestArticle.Body' => '100',
+					'TestArticle.Body.op' => 'lte',
+				),
+		));
+
+		$this->assertInternalType('integer', $countResult);
+		$this->assertEqual($countResult, 2);
+	}
+
+/*
+ * testCreateRecordError method
+ *
+ * @return void
+ */
+	public function testCreateRecordError() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT Title',
+				'Body' => 'UT Body',
+				'-recid' => '0',
+			)
+		);
+		$model->create();
+
+		$saveResult = $model->save($_data);
+		
+		$this->assertFalse($saveResult);
+	}
+
+/**
+ * testCreateFindRecordError method
+ *
+ * @return void
+ */
+	public function testCreateFindRecordError() {
+		$model =& new TestArticle();
+
+		$_data = array(
+			'TestArticle' => array(
+				array(
+					'Title' => 'UT testfinderror',
+				), 
+			)
+		);
+		$model->create();
+		$saveResult = $model->saveAll($_data['TestArticle'], array(
+			'atomic' => FALSE
+		));
+
+		$this->assertInternalType('array', $saveResult);
+
+		$model->defaultLayout = 'notExistingLayout';
+		$findResult = $model->find('all', array(
+			'conditions' => array(
+					'TestArticle.Title' => 'UT testfinderror',
+				),
+		));
+
+		$this->assertFalse($findResult);
+	}
+
+/**
+ * testCreateFindCountRecordError method
+ *
+ * @return void
+ */
+	public function testCreateFindCountRecordError() {
+		$model =& new TestArticle();
+
+		$_data = array(
+			'TestArticle' => array(
+				array(
+					'Title' => 'UT testfindcounterror',
+				), 
+			)
+		);
+		$model->create();
+		$saveResult = $model->saveAll($_data['TestArticle'], array(
+			'atomic' => FALSE
+		));
+
+		$this->assertInternalType('array', $saveResult);
+
+		$model->defaultLayout = 'notExistingLayout';
+		$countResult = $model->find('count', array(
+			'conditions' => array(
+					'TestArticle.Title' => 'UT testfindcounterror',
+				),
+		));
+
+		$this->assertFalse($countResult);
+	}
+
+/**
+ * testCreateSaveRecordError method
+ *
+ * @return void
+ */
+	public function testCreateSaveRecordError() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT CSRE Title',
+				'Body' => 'UT CSRE Body'
+			)
+		);
+		$model->create();
+		$createResult = $model->save($_data);
+
+		$this->assertInternalType('array', $createResult);
+		$this->assertEqual($createResult['TestArticle']['Title'], 'UT CSRE Title');
+
+		$_data = array(
+			'TestArticle' => array(
+				'id' => $createResult['TestArticle']['id'],
+				'-recid' => 0,
+				'Title' => 'UT CSRE Title Updated',
+				'Body' => 'UT CSRE Body Updated'
+			)
+		);
+		$model->create();
+		$model->id = $createResult['TestArticle']['id'];
+		$saveResult = $model->save($_data);
+		
+		$this->assertFalse($saveResult);
+
+		$findResult = $model->find('first', array(
+			'conditions' => array(
+				'TestArticle.id' => $createResult['TestArticle']['id']
+			)
+		));
+
+		$this->assertInternalType('array', $findResult);
+		$this->assertEqual($findResult['TestArticle']['Title'], 'UT CSRE Title');
+		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CSRE Body');
+	}
+
+/**
+ * testCreateDeleteRecordError method
+ *
+ * @return void
+ */  
+	public function testCreateDeleteRecordError() {
+		$model =& new TestArticle();
+		$_data = array(
+			'TestArticle' => array(
+				'Title' => 'UT CDRE Title',
+				'Body' => 'UT CDRE Body'
+			)
+		);
+		$model->create();
+		$saveResult = $model->save($_data);
+
+		$result = $model->deleteAll(array('-recid' => -1), false);
+
+		$this->assertFalse($result);
 	}
 
 /**
@@ -549,6 +989,7 @@ class FilemakerTest extends CakeTestCase {
 		$this->assertEqual($result[0]['TestArticle']['Body'], 'lorem ipsum');
 	}
 
+
 /**
  * testValueList method
  *
@@ -572,6 +1013,78 @@ class FilemakerTest extends CakeTestCase {
 
 		$this->assertEqual(count($schema['Title']['valuelist']), 3);
 		$this->assertEqual(count($schema['Body']['valuelist']), 3);
+	}
+
+/**
+ * testBegin method
+ *
+ * @return void
+ */
+	public function testBegin() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->begin());
+	}
+
+/**
+ * testRollback method
+ *
+ * @return void
+ */
+	public function testRollback() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->rollback());
+	}
+
+/**
+ * testCommit method
+ *
+ * @return void
+ */
+	public function testCommit() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->commit());
+	}
+
+/**
+ * testLastNumRows method
+ *
+ * @return void
+ */
+	public function testLastNumRows() {
+		$this->assertNull(ConnectionManager::getDataSource('test')->lastNumRows());
+	}
+
+/**
+ * testExecute method
+ *
+ * @return void
+ */
+	public function testExecute() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->execute('NOT USED'));
+	}
+
+/**
+ * testFetchAll method
+ *
+ * @return void
+ */
+	public function testFetchAll() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->fetchAll('NOT USED'));
+	}
+
+/**
+ * testLogQuery method
+ *
+ * @return void
+ */
+	public function testLogQuery() {
+		$this->assertNull(ConnectionManager::getDataSource('test')->logQuery('NOT USED'));
+	}
+
+/**
+ * testShowLog method
+ *
+ * @return void
+ */
+	public function testShowLog() {
+		$this->assertFalse(ConnectionManager::getDataSource('test')->showLog());
 	}
 
 /**
