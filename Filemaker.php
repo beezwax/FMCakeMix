@@ -445,7 +445,7 @@ class Filemaker extends DboSource {
 						$model->id = $value[0];
 						$model->setInsertID($value[0]);
 					}
-					$resultsOut[$model->name][$field] = $value[0];
+					$resultsOut[$model->name][$field] = isset($value[0]) ? $value[0] : null;
 				}
 			}
 		}
