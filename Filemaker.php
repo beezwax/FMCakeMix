@@ -139,6 +139,7 @@ class Filemaker extends DboSource {
 	public function read(&$model, $queryData = array(), $recursive = null) {
 		$fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
 		$fm_layout = empty($model->defaultLayout) ? $this->config['defaultLayout'] : $model->defaultLayout;
+		$fm_responseLayout = empty($model->responseLayout) ? '' : $model->responseLayout;
 		$queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
 		$linkedModels = array();
 
@@ -153,10 +154,10 @@ class Filemaker extends DboSource {
 		// set connection data if Count query
 		if($queryData['fields'] == 'COUNT') {
 			// reset the connection parameters to return only 1 result, improves performance
-			$this->connection->SetDBData($fm_database, $fm_layout, 1 );
+			$this->connection->SetDBData($fm_database, $fm_layout, 1, $fm_responseLayout);
 		} else {
 			// set basic connection data
-			$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit );
+			$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit, $fm_responseLayout);
 		}
 
 
@@ -724,10 +725,11 @@ class Filemaker extends DboSource {
 	public function readAssociated($linkedModel, $queryData = array (), $recursive = null) { 
 		$fm_database = empty($linkedModel->fmDatabaseName) ? $this->config['database'] : $linkedModel->fmDatabaseName;
 		$fm_layout = empty($linkedModel->defaultLayout) ? $this->config['defaultLayout'] : $linkedModel->defaultLayout;
+		$fm_responseLayout = empty($linkedModel->responseLayout) ? '' : $linkedModel->responseLayout;
 		$queryLimit = $queryData['limit'] == null ? 'all' : $queryData['limit'];
 
 		// set basic connection data
-		$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit );
+		$this->connection->SetDBData($fm_database, $fm_layout, $queryLimit, $fm_responseLayout);
 
 		// add the params
 		if(!empty($queryData['conditions'])) {
