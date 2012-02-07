@@ -208,7 +208,7 @@ class Filemaker extends DboSource {
 
 		// set sort order
 		foreach($queryData['order'] as $orderCondition) {
-			if(!empty($orderCondition)){
+			if(!empty($orderCondition) && is_array($orderCondition)){
 				foreach($orderCondition as $conditionField => $sortRule) {
 					$field = $this->parseConditionField($model, $conditionField, 'field');
 
@@ -744,7 +744,7 @@ class Filemaker extends DboSource {
 
 		// set sort order
 		foreach($queryData['order'] as $orderCondition) {
-			if(!empty($orderCondition)){
+			if(!empty($orderCondition) && is_array($orderCondition)){
 				foreach($orderCondition as $field => $sortRule) {
 					$string = $field;
 					$pattern = '/(\w+)\.(-*\w+)$/i';
