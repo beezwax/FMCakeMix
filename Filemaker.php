@@ -555,15 +555,16 @@ class Filemaker extends DboSource {
 
 
 		foreach($result['fields'] as $field) {
-			$type = $fmFieldTypeConversion[$field['type']];
-			$fieldsOut[$field['name']] = array(
-				'type' => $type,     
-				'null' => null, 
-				'default' => null, 
-				'length' => null, 
-				'key' => null
-			);
-
+			if (!empty($field['name'])) {
+				$type = $fmFieldTypeConversion[$field['type']];
+				$fieldsOut[$field['name']] = array(
+					'type' => $type,     
+					'null' => null, 
+					'default' => null, 
+					'length' => null, 
+					'key' => null
+				);
+			}
 		}
 
 		$fieldsOut['-recid'] = array(
@@ -802,7 +803,7 @@ class Filemaker extends DboSource {
 					// if $field is not a related entity
 					if(strpos($field, '::') === false) {
 						// grab table field data (grabs first repitition)
-						$resultsOut[$i][$linkedModel->name][$field] = $value[0];
+						$resultsOut[$i][$linkedModel->name][$field] = isset($value[0]) ? $value[0] : null;
 					} else {
 						$resultsOut[$i][$linkedModel->name][$field] = isset($value[0]) ? $value[0] : null;
 					}
