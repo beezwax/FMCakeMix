@@ -476,7 +476,7 @@ class FilemakerTest extends CakeTestCase {
 			'TestArticle' => array(
 				'id' => $primaryKeyID,
 				'Title' => 'UT CU Title Updated',
-				'Body' => 'UT CU Body Updated'
+				'Body' => array('UT CU Body Updated', 'UT CU Body Updated2')
 			)
 		);
 
@@ -491,7 +491,7 @@ class FilemakerTest extends CakeTestCase {
 		$this->assertEqual($saveResult['TestArticle']['-recid'], $findResult['TestArticle']['-recid']);
 		$this->assertEqual($findResult['TestArticle']['id'], $primaryKeyID);
 		$this->assertEqual($findResult['TestArticle']['Title'], 'UT CU Title Updated');
-		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CU Body Updated');
+		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CU Body Updated' . PHP_EOL . 'UT CU Body Updated2');
 	}
 
 /**

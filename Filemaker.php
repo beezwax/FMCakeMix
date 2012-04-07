@@ -501,7 +501,11 @@ class Filemaker extends DboSource {
 				$model->id = $values[$index];
 				$model->setInsertID($values[$index]);
 			}
-			$this->connection->AddDBParam($field, $values[$index]);
+			if (is_array($values[$index])) {
+				$this->connection->AddDBParam($field, implode("\r\n", $values[$index]));
+			} else {
+				$this->connection->AddDBParam($field, $values[$index]);
+			}
 		}
 
 		// perform edit
