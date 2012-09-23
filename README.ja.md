@@ -28,17 +28,18 @@ http://cakephp.org/ からCakePHPをダウンロードして、Webサイトの�
 FX.phpは、Chris Hansen氏が中心になって開発した、PHPからFileMaker Proデータベー
 スに接続するためのライブラリクラスです。FMCakeMixは、FileMaker Proデータベース
 に接続する際に内部的にFX.phpを利用しています。http://www.iviking.org/FX.php/ か
-らFX.phpのファイルをダウンロードして、FX.php、FX_Error.php、FX_Constants.phpお
-よびimage_proxy.phpのファイルをvendorsフォルダの直下に配置します。
+らFX.phpのファイルをダウンロードして、FX.php、FX_Error.php、ObjectiveFX.php、
+FX_constants.phpおよびimage_proxy.phpのファイルとdatasource_classesフォルダを
+app/Vendorフォルダの直下に配置します。
 
 FileMaker Proデータベースとの接続にXMLを利用しているため、XMLを使用したカスタム
 Web公開機能をサポートしているFileMaker ServerもしくはFileMaker Server Advanced
 でデータベースをホストしなければなりません。手順についてはFileMaker Serverに付
 属のマニュアルを参照してください。
 
-CakePHP 1.3の場合には、app/models/datasources/dboフォルダにdbo_fmcakemix.php
-ファイルを配置します。おそらくdatasourcesフォルダにおいてdboという名称のディレ
-クトリを作成する必要があるでしょう。
+CakePHP 2.0の場合には、app/Model/Datasource/DatabaseフォルダにFilemaker.php
+ファイルを配置します。おそらくDatasourceフォルダにおいてDatabaseという名称の
+ディレクトリを作成する必要があるでしょう。
 
 サポート
 -------

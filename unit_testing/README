@@ -2,6 +2,6 @@ Basic unit testing for development
 
 1) load the DriverUnitTesting.fp7 FileMaker database into your FileMaker server
 
-2) install the cases into yourcakeinstall/app/tests
+2) install the Case into yourcakeinstall/app/Test
 
 3) define a test database connection that points to the DriverUnitTesting database
