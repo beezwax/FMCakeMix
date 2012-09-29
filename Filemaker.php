@@ -738,9 +738,11 @@ class Filemaker extends DboSource {
 
 			$associatedData = $this->readAssociated($linkModel, $queryData, 0);
 
-			foreach($associatedData as $assocIndex => $relatedModel) {
-				$modelName = key($relatedModel);
-				$resultSet[$projIndex][$modelName][$assocIndex] = $relatedModel[$modelName];
+			if (is_array($associatedData)) {
+				foreach($associatedData as $assocIndex => $relatedModel) {
+					$modelName = key($relatedModel);
+					$resultSet[$projIndex][$modelName][$assocIndex] = $relatedModel[$modelName];
+				}
 			}
 		}
 	}
