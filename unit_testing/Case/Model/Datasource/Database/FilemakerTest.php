@@ -494,12 +494,15 @@ class FilemakerTest extends CakeTestCase {
 		$model =& new TestArticle();
 		$_data = array(
 			'TestArticle' => array(
-				'Title' => 'UT CU Title',
-				'Body' => 'UT CU Body'
+				'Title' => 'UT CU Title' . "\r\n" . 'UT CU Title Line 2' . "\n" . 'UT CU Title Line 3' . "\r" . 'UT CU Title Line 4',
+				'Body' => array('UT CU Body', 'UT CU Body 2')
 			)
 		);
 		$model->create();
 		$saveResult = $model->save($_data);
+
+		$this->assertEqual($saveResult['TestArticle']['Title'], 'UT CU Title' . "\n" . 'UT CU Title Line 2' . "\n" . 'UT CU Title Line 3' . "\n" . 'UT CU Title Line 4');
+		$this->assertEqual($saveResult['TestArticle']['Body'], 'UT CU Body' . "\n" . 'UT CU Body 2');
 
 		$primaryKeyID = $model->id;
 
@@ -522,7 +525,7 @@ class FilemakerTest extends CakeTestCase {
 		$this->assertEqual($saveResult['TestArticle']['-recid'], $findResult['TestArticle']['-recid']);
 		$this->assertEqual($findResult['TestArticle']['id'], $primaryKeyID);
 		$this->assertEqual($findResult['TestArticle']['Title'], 'UT CU Title Updated');
-		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CU Body Updated' . PHP_EOL . 'UT CU Body Updated2');
+		$this->assertEqual($findResult['TestArticle']['Body'], 'UT CU Body Updated' . "\n" . 'UT CU Body Updated2');
 	}
 
 /**

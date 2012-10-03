@@ -438,7 +438,15 @@ class Filemaker extends DboSource {
 		}
 
 		foreach($fields as $index => $field) {
-			$this->connection->AddDBParam($field, $values[$index]);
+			if (is_array($values[$index])) {
+				$this->connection->AddDBParam($field, implode("\r", $values[$index]));
+			} else {
+				if (function_exists("mb_ereg_replace")) {
+					$this->connection->AddDBParam($field, mb_ereg_replace("\n", "\r" , mb_ereg_replace("\r\n", "\r" , $values[$index])));
+				} else {
+					$this->connection->AddDBParam($field, str_replace("\n", "\r", str_replace("\r\n", "\r" ,$values[$index])));
+				}
+			}
 		}
 
 		// perform creation
@@ -518,9 +526,13 @@ class Filemaker extends DboSource {
 				$model->setInsertID($values[$index]);
 			}
 			if (is_array($values[$index])) {
-				$this->connection->AddDBParam($field, implode("\r\n", $values[$index]));
+				$this->connection->AddDBParam($field, implode("\r", $values[$index]));
 			} else {
-				$this->connection->AddDBParam($field, $values[$index]);
+				if (function_exists("mb_ereg_replace")) {
+					$this->connection->AddDBParam($field, mb_ereg_replace("\n", "\r" , mb_ereg_replace("\r\n", "\r" , $values[$index])));
+				} else {
+					$this->connection->AddDBParam($field, str_replace("\n", "\r", str_replace("\r\n", "\r" ,$values[$index])));
+				}
 			}
 		}
 
@@ -726,9 +738,11 @@ class Filemaker extends DboSource {
 
 			$associatedData = $this->readAssociated($linkModel, $queryData, 0);
 
-			foreach($associatedData as $assocIndex => $relatedModel) {
-				$modelName = key($relatedModel);
-				$resultSet[$projIndex][$modelName][$assocIndex] = $relatedModel[$modelName];
+			if (is_array($associatedData)) {
+				foreach($associatedData as $assocIndex => $relatedModel) {
+					$modelName = key($relatedModel);
+					$resultSet[$projIndex][$modelName][$assocIndex] = $relatedModel[$modelName];
+				}
 			}
 		}
 	}
