@@ -13,7 +13,7 @@ See the User Guide.pdf for usage information
 Notice
 ------
 
-This product should be considered a work in progress, please test and use at your own risk and contribute back any changes or fixes you may have. The driver is currently targeted to work with the 3.X series of CakePHP.
+This product should be considered a work in progress, please test and use at your own risk and contribute back any changes or fixes you may have.
 
 
 Installation
@@ -34,7 +34,7 @@ solutions must be hosted on a version of FileMaker Server that supports web
 publishing and xml access. See the FileMaker Server documentation for
 instructions on enabling these features.
 
-In case of CakePHP 2.0, install the Filemaker.php file into
+In case of CakePHP 2.x, install the Filemaker.php file into
 yourcakeinstall/app/Model/Datasource/Database, you’ll likely have to create the
 Database directory in the Datasource folder.
 
@@ -44,13 +44,11 @@ Support
 See "License" below for the warranty and support disclaimer (that is, you're on
 your own, buddy).
 
-That being said, you might be able to get some help at [the project
-site](https://projects.beezwax.net/projects/show/cake-fm-driver).
-
 Credit
 ------
 
 * Author: Alex Gibbons <alex_g@beezwax.net>
+* Maintainer: Atsushi Matsuo <famlog@gmail.com>
 
 Thanks
 ------
