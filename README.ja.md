@@ -50,7 +50,7 @@ CakePHP 2.xの場合には、app/Model/Datasource/DatabaseフォルダにFilemak
 ------
 
 * 作者：Alex Gibbons <alex_g@beezwax.net>
-* メンテナー: Atsushi Matsuo <famlog@gmail.com>
+* メンテナー：Atsushi Matsuo <famlog@gmail.com>
 
 謝辞
 ------
