@@ -37,7 +37,7 @@
 // =================================================================================
 
 App::uses('DboSource', 'Model/Datasource');
-App::import('Vendor','FX', array('file' => 'FX.php'));
+App::uses('FX', 'Vendor/FX');
 
 class Filemaker extends DboSource { 
 
