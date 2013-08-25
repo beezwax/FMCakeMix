@@ -37,7 +37,7 @@
 // =================================================================================
 
 App::uses('DboSource', 'Model/Datasource');
-App::uses('FX', 'Vendor/FX');
+App::uses('FX', 'Vendor');
 
 class Filemaker extends DboSource { 
 
