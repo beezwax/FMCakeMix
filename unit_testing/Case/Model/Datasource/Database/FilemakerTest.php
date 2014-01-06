@@ -840,6 +840,11 @@ class FilemakerTest extends CakeTestCase {
 
 		$this->assertInternalType('integer', $countResult);
 		$this->assertEqual($countResult, 2);
+
+        $countResult = $model->find('count', array(
+            'conditions' => array(),
+        ));
+        $this->assertEqual($countResult, 3);
 	}
 
 /*

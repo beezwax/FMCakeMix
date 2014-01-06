@@ -16,8 +16,8 @@ FMCakeMixの使い方についてはUser Guide.pdf（英文）を参照してく
 ------
 
 このソフトウェアは開発途上版であることに留意し、各自で検証しながら自己責任の下で
-使用してください。フィードバックや不具合の修正等も歓迎しています。なお、現時点で
-は本ドライバーはCakePHP 3.0系統を対象として開発をしています。
+使用してください。フィードバックや不具合の修正等も歓迎しています。なお、本ドライ
+バーはCakePHP 2.xに対応しています。
 
 インストール
 ------------
@@ -37,7 +37,7 @@ Web公開機能をサポートしているFileMaker ServerもしくはFileMaker 
 でデータベースをホストしなければなりません。手順についてはFileMaker Serverに付
 属のマニュアルを参照してください。
 
-CakePHP 2.0の場合には、app/Model/Datasource/DatabaseフォルダにFilemaker.php
+CakePHP 2.xの場合には、app/Model/Datasource/DatabaseフォルダにFilemaker.php
 ファイルを配置します。おそらくDatasourceフォルダにおいてDatabaseという名称の
 ディレクトリを作成する必要があるでしょう。
 
@@ -47,13 +47,11 @@ CakePHP 2.0の場合には、app/Model/Datasource/DatabaseフォルダにFilemak
 免責事項については下記のライセンス条項をご覧ください。（つまり、自力で頑張って
 ということです。）
 
-とはいえ、[プロジェクトサイト](https://projects.beezwax.net/projects/show/cake-fm-driver)
-を通じて多少のサポートはできるかもしれません。
-
 クレジット
 ------
 
 * 作者：Alex Gibbons <alex_g@beezwax.net>
+* メンテナー：Atsushi Matsuo <famlog@gmail.com>
 
 謝辞
 ------

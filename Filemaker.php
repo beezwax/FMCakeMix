@@ -31,13 +31,13 @@
 // = FX.php : required base class
 // =================================================================================
 // FX is a free open-source PHP class for accessing FileMaker using curl and xml
-// By: Chris Hansen with Chris Adams, Gjermund Thorsen, and others
-// Tested with version: 4.5.1
+// By: Chris Hansen with Chris Adams, Gjermund Thorsen, Masayuki Nii, and others
+// Tested with version: 4.5.1, 6.0
 // Web Site: www.iviking.org
 // =================================================================================
 
 App::uses('DboSource', 'Model/Datasource');
-App::import('Vendor','FX', array('file' => 'FX.php'));
+App::uses('FX', 'Vendor');
 
 class Filemaker extends DboSource { 
 
