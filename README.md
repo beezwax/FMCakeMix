@@ -13,7 +13,7 @@ See the User Guide.pdf for usage information
 Notice
 ------
 
-This product should be considered a work in progress, please test and use at your own risk and contribute back any changes or fixes you may have. This driver is compatible with CakePHP 2.x.
+This product should be considered a work in progress, please test and use at your own risk and contribute back any changes or fixes you may have. This driver is compatible with only CakePHP 2.x.
 
 
 Installation
