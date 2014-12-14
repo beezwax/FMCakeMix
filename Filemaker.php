@@ -131,12 +131,12 @@ class Filemaker extends DboSource {
 /**
  * The "R" in CRUD 
  * 
- * @param Model $model 
- * @param array $queryData 
- * @param integer $recursive Number of levels of association 
+ * @param Model $Model A Model object that the query is for.
+ * @param array $queryData An array of queryData information containing keys similar to Model::find().
+ * @param int $recursive Number of levels of association
  * @return mixed boolean false on error/failure.  An array of results on success.
  */
-	public function read(&$model, $queryData = array(), $recursive = null) {
+	public function read(Model $model, $queryData = array(), $recursive = null) {
 		$fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
 		$fm_layout = empty($model->defaultLayout) ? $this->config['defaultLayout'] : $model->defaultLayout;
 		$fm_responseLayout = empty($model->responseLayout) ? '' : $model->responseLayout;
@@ -402,12 +402,14 @@ class Filemaker extends DboSource {
 /**
  * The "C" in CRUD
  * 
- * @param Model $model
- * @param array $fields
- * @param array $values
+ * @param Model $Model Model object that the record is for.
+ * @param array $fields An array of field names to insert. If null, $Model->data will be
+ *   used to generate field names.
+ * @param array $values An array of values with keys matching the fields. If null, $Model->data will
+ *   be used to generate values.
  * @return boolean Success
  */
-	public function create(&$model, $fields = null, $values = null) {
+	public function create(Model $model, $fields = null, $values = null) {
 		$id = null;
 
 		// if empty then use data in model
@@ -693,10 +695,23 @@ class Filemaker extends DboSource {
 	}
 
 /**
- * GenerateAssociationQuery
+ * Generates a query or part of a query from a single model or two associated models.
+ *
+ * Builds a string containing an SQL statement template.
+ *
+ * @param Model $Model Primary Model object.
+ * @param Model|null $LinkModel Linked model object.
+ * @param string $type Association type, one of the model association types ie. hasMany.
+ * @param string $association Association name.
+ * @param array $assocData Association data.
+ * @param array &$queryData An array of queryData information containing keys similar to Model::find().
+ * @param bool $external Whether or not the association query is on an external datasource.
+ * @return mixed
+ *   String representing a query.
+ *   True, when $external is false and association $type is 'hasOne' or 'belongsTo'.
  */
-	public function generateAssociationQuery(& $model, & $linkModel, $type, $association = null, $assocData = array (), & $queryData, $external = false, & $resultSet) {         
-		switch ($type) { 
+	public function generateAssociationQuery(Model $model, $linkModel, $type, $association = null, $assocData = array(), &$queryData, $external = false, &$resultSet) {
+		switch ($type) {;
 			case 'hasOne' : 
 				$id = $resultSet[$model->name][$model->primaryKey]; 
 				$queryData['conditions'] = trim($assocData['foreignKey']) . '=' . trim($id); 
@@ -728,11 +743,31 @@ class Filemaker extends DboSource {
 		return null; 
 	}
 
-/**
- * QueryAssociation
- * 
+	/**
+ * Queries associations.
+ *
+ * Used to fetch results on recursive models.
+ *
+ * - 'hasMany' associations with no limit set:
+ *    Fetch, filter and merge is done recursively for every level.
+ *
+ * - 'hasAndBelongsToMany' associations:
+ *    Fetch and filter is done unaffected by the (recursive) level set.
+ *
+ * @param Model $Model Primary Model object.
+ * @param Model $LinkModel Linked model object.
+ * @param string $type Association type, one of the model association types ie. hasMany.
+ * @param string $association Association name.
+ * @param array $assocData Association data.
+ * @param array &$queryData An array of queryData information containing keys similar to Model::find().
+ * @param bool $external Whether or not the association query is on an external datasource.
+ * @param array &$resultSet Existing results.
+ * @param int $recursive Number of levels of association.
+ * @param array $stack A list with joined models.
+ * @return mixed
+ * @throws CakeException when results cannot be created.
  */
-	public function queryAssociation(& $model, & $linkModel, $type, $association, $assocData, & $queryData, $external = false, & $resultSet, $recursive, $stack) {
+	public function queryAssociation(Model $model, Model $linkModel, $type, $association, $assocData, &$queryData, $external = false, &$resultSet, $recursive, $stack) {
 		foreach($resultSet as $projIndex => $row) {
 			$queryData = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $row);
 
@@ -884,9 +919,10 @@ class Filemaker extends DboSource {
  *
  * @param mixed $model
  * @param boolean $quote
+ * @param bool $schema Whether you want the schema name included.
  * @return string Full quoted table name
  */
-	public function fullTableName($model, $quote = true) {
+	public function fullTableName($model, $quote = true, $schema = true) {
 		if (is_object($model)) {
 			$table = $model->tablePrefix . $model->table;
 		} elseif (isset($this->config['prefix'])) {
@@ -903,9 +939,10 @@ class Filemaker extends DboSource {
 /**
  * Returns a formatted error message from previous database operation. 
  * 
+ * @param PDOStatement $query the query to extract the error from if any
  * @return string Error message with error number 
  */
-	public function lastError() { 
+	public function lastError(PDOStatement $query = null) { 
 		if (FX::isError($this->lastFXError)) { 
 			return $this->lastFXError.getCode() . ': ' . $this->lastFXError.getMessage(); 
 		}
@@ -1062,9 +1099,10 @@ class Filemaker extends DboSource {
  * NOT USED
  *
  * @param string $sql SQL statement
+ * @param array $params Values binded to the query (prepared statements)
  * @return void
  */ 
-	public function logQuery($sql) {
+	public function logQuery($sql, $params = array()) {
 	}
 
 /**
@@ -1077,10 +1115,10 @@ class Filemaker extends DboSource {
 /**
  * Outputs the contents of the queries log.
  * 
- * @param boolean $sorted
+ * @param bool $sorted Get the queries sorted by time taken, defaults to false.
  * @return false
  */
-	public function showLog() {
+	public function showLog($sorted = false) {
 		return false;
 	}
 }
