@@ -4,8 +4,7 @@ FMCakeMix
 FMCakeMixは、MVCフレームワークであるCakePHP用のFileMakerデータソースドライバー
 です。FMCakeMixを利用すると、SQLデータベースと同じようにFileMakerとCakePHPを統
 合できます。すなわち、モダンなWebアプリケーションフレームワークを使って、
-FileMakerデータベースと連係するWebアプリケーションを迅速に開発できるようになる
-のです。
+FileMakerデータベースと連係するWebアプリケーションを迅速に開発できるようになります。
 
 CakePHPに関する詳細については次のWebサイトを参照してください：
 http://cakephp.org/
@@ -15,9 +14,9 @@ FMCakeMixの使い方についてはUser Guide.pdf（英文）を参照してく
 注意点
 ------
 
-このソフトウェアは開発途上版であることに留意し、各自で検証しながら自己責任の下で
-使用してください。フィードバックや不具合の修正等も歓迎しています。なお、現時点で
-は本ドライバーはCakePHP 3.0系統を対象として開発をしています。
+このソフトウェアは開発途上版であることに留意し、各自で検証しながら自己責任の下で使
+用してください。フィードバックや不具合の修正等も歓迎しています。なお、本ドライバー
+はCakePHP 2.xに対応しています（現在のところCakePHP 3.xには対応していません）。
 
 インストール
 ------------
@@ -28,17 +27,18 @@ http://cakephp.org/ からCakePHPをダウンロードして、Webサイトの�
 FX.phpは、Chris Hansen氏が中心になって開発した、PHPからFileMaker Proデータベー
 スに接続するためのライブラリクラスです。FMCakeMixは、FileMaker Proデータベース
 に接続する際に内部的にFX.phpを利用しています。http://www.iviking.org/FX.php/ か
-らFX.phpのファイルをダウンロードして、FX.php、FX_Error.php、FX_Constants.phpお
-よびimage_proxy.phpのファイルをvendorsフォルダの直下に配置します。
+らFX.phpのファイルをダウンロードして、FX.php、FX_Error.php、ObjectiveFX.php、
+FX_constants.phpおよびimage_proxy.phpのファイルとdatasource_classesフォルダを
+app/Vendorフォルダの直下に配置します。
 
 FileMaker Proデータベースとの接続にXMLを利用しているため、XMLを使用したカスタム
 Web公開機能をサポートしているFileMaker ServerもしくはFileMaker Server Advanced
 でデータベースをホストしなければなりません。手順についてはFileMaker Serverに付
 属のマニュアルを参照してください。
 
-CakePHP 1.3の場合には、app/models/datasources/dboフォルダにdbo_fmcakemix.php
-ファイルを配置します。おそらくdatasourcesフォルダにおいてdboという名称のディレ
-クトリを作成する必要があるでしょう。
+CakePHP 2.xの場合には、app/Model/Datasource/DatabaseフォルダにFilemaker.php
+ファイルを配置します。おそらくDatasourceフォルダにおいてDatabaseという名称の
+ディレクトリを作成する必要があるでしょう。
 
 サポート
 -------
@@ -46,13 +46,11 @@ CakePHP 1.3の場合には、app/models/datasources/dboフォルダにdbo_fmcake
 免責事項については下記のライセンス条項をご覧ください。（つまり、自力で頑張って
 ということです。）
 
-とはいえ、[プロジェクトサイト](https://projects.beezwax.net/projects/show/cake-fm-driver)
-を通じて多少のサポートはできるかもしれません。
-
 クレジット
 ------
 
 * 作者：Alex Gibbons <alex_g@beezwax.net>
+* メンテナー：Atsushi Matsuo <famlog@gmail.com>
 
 謝辞
 ------
