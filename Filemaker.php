@@ -329,7 +329,7 @@ class Filemaker extends DboSource {
  * @param array $params Function parameters
  * @return string flag informing read function to parse results as per special case of $func
  */
-	public function calculate(&$model, $func, $params = array()) {
+	public function calculate(Model $model, $func, $params = array()) {
 		$params = (array)$params;
 
 		switch (strtolower($func)) {
@@ -363,7 +363,7 @@ class Filemaker extends DboSource {
  * @param array $conditions
  * @return boolean Success
  */
-	public function delete(&$model, $conditions = null) {
+	public function delete(Model $model, $conditions = null) {
 		$fm_database = empty($model->fmDatabaseName) ? $this->config['database'] : $model->fmDatabaseName;
 		$fm_layout = empty($model->defaultLayout) ? $this->config['defaultLayout'] : $model->defaultLayout;
 
@@ -554,7 +554,7 @@ class Filemaker extends DboSource {
  * @param string $model the model to inspect
  * @return array Fields in table. Keys are name and type
  */
-	public function describe(&$model) {
+	public function describe($model) {
 
 		// describe caching
 		$cache = $this->__describeFromCache($model);
@@ -767,7 +767,7 @@ class Filemaker extends DboSource {
  * @return mixed
  * @throws CakeException when results cannot be created.
  */
-	public function queryAssociation(Model $model, Model $linkModel, $type, $association, $assocData, &$queryData, $external = false, &$resultSet, $recursive, $stack) {
+	public function queryAssociation(Model $model, &$linkModel, $type, $association, $assocData, &$queryData, $external = false, &$resultSet, $recursive, $stack) {
 		foreach($resultSet as $projIndex => $row) {
 			$queryData = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $row);
 
